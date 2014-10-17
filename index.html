@@ -85,8 +85,7 @@
 			gui.add(text, 'attraction',-0.00001,0.00001);*/
 			
 			// Write text and choose effect
-			//var name = prompt("What's your name?");
-			var name = 'alex';
+			var name = prompt("What's your name?");
 			text.write(name, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
 			
 			$('canvas').mousemove(function(e){ text.mouseMove(e); });

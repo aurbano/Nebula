@@ -12,22 +12,22 @@ var Nebula = function (options) {
 		tolerance: 0, // 0 to 1
 		minRad: 0,
 		maxRad: 40,
-		maxInitRad: 0.0001,
-		maxSpeed: 0.8,
+		maxInitRad: 0.001,
+		maxSpeed: 2,
 		variation: 0.2,
 		explosionRadius: 100,
 		attraction: 0.00001, // Attraction towards their real center, based on distance
 		explosionForce: 0.01, // Explosive force
 		mode: 'colorful', // Normal or colorful
 		debug: true,
-		drawFn: 'rectangle',
+		drawFn: 'circle',
 		showForce: false,
 		showDistance: false,
 		wait: 1,
 		showEdges: false,
 		resolutionScale: 35,
 		radLimitScale: 10600,
-		fadeAmount: 0.1,
+		fadeAmount: 0,
 		fadeColor: 'rgb(0,0,0)'
 	};
 
