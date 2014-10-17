@@ -75,18 +75,19 @@
 		$(document).ready(function(){
 			var text = new Nebula();
 			
-			// Uncomment block for dat.gui
+			/*// Uncomment block for dat.gui
 			var gui = new dat.GUI();
 			gui.add(text, 'tolerance',0,1);
 			gui.add(text, 'minRad',0,100);
 			gui.add(text, 'maxRad',0,100);
 			gui.add(text, 'maxSpeed',0,10);
 			gui.add(text, 'variation',0,5);
-			gui.add(text, 'attraction',-0.00001,0.00001);
+			gui.add(text, 'attraction',-0.00001,0.00001);*/
 			
 			// Write text and choose effect
-			var name = prompt("What's your name?");
-			text.write(name, 'circles', ['rgba(0,0,255,0.5)', 'rgba(255,0,0,0.2)']);
+			//var name = prompt("What's your name?");
+			var name = 'alex';
+			text.write(name, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
 			
 			$('canvas').mousemove(function(e){ text.mouseMove(e); });
 			$('canvas').resize(function(e){text.resizeCanvas(); });
