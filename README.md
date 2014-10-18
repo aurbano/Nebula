@@ -65,8 +65,9 @@ The following options can be passed to the constructor for configuration:
 | resolutionScale | `int` | 35 | Scale the edge resolution, it modifies the number of nodes created |
 | radLimitScale | `int` | 10600 | Limit the maximum radius, play with this number to see what it actually does. |
 | fadeAmount | `int` | 0 | If set to > 0 it will fade on every cycle instead of clearing the canvas. |
-| fadeColor | `String` | 'rgb(0,0,0)' | Fade color used, set it to match the background |
-| 
+| fadeColor | `Array` | [0,0,0] | Fade color used, set it to match the background. Specify in RGB as an Array |
+
+To learn better what each parameter does open the `index.html` file and play with the dat.gui controls.
 
 ##License
 The HTML Clock is released under the GNU GPLv2 License.
