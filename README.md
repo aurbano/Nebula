@@ -25,7 +25,7 @@ $(document).ready(function(){
       var name = prompt("What's your name?");
       
       // Write the name using circles of the specified colors
-      text.write(name, 'circles', ['rgba(0,0,255,0.5)', 'rgba(255,0,0,0.2)']);
+      text.write(name, ['rgba(0,0,255,0.5)', 'rgba(255,0,0,0.2)']);
       
       // Optional stuff
       $('canvas').mousemove(function(e){ text.mouseMove(e); });
@@ -33,6 +33,11 @@ $(document).ready(function(){
       $('canvas').click(function(e){text.explosion(e); });
 });
 ```
+
+The function that starts the drawing is `write(text, colors)`. It accepts 3 parameters as you can see in the example:
+
+* `text`: Determines the text to be drawn
+* `colors`: This must be an array of colors in rgba format. For each color a set of nodes will appear. More colors means more processing of course.
 
 ##Options
 The following options can be passed to the constructor for configuration:

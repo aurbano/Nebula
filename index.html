@@ -75,18 +75,42 @@
 		$(document).ready(function(){
 			var text = new Nebula();
 			
-			/*// Uncomment block for dat.gui
+			// Uncomment block for dat.gui
 			var gui = new dat.GUI();
-			gui.add(text, 'tolerance',0,1);
-			gui.add(text, 'minRad',0,100);
-			gui.add(text, 'maxRad',0,100);
-			gui.add(text, 'maxSpeed',0,10);
-			gui.add(text, 'variation',0,5);
-			gui.add(text, 'attraction',-0.00001,0.00001);*/
+
+			var f1 = gui.addFolder('Particle physics');
+			var f2 = gui.addFolder('Explosions');
+			var f3 = gui.addFolder('Rendering');
+
+			var textController = gui.add(text, 'text');
+			gui.add(text.settings, 'debug', [true, false]);
+			gui.add(text.settings, 'wait', 0, 60);
+
+			f1.add(text.settings, 'tolerance',0,1);
+			f1.add(text.settings, 'minRad',0,100);
+			f1.add(text.settings, 'maxRad',0,100);
+			f1.add(text.settings, 'maxInitRad',0,1);
+			f1.add(text.settings, 'maxSpeed',0,10);
+			f1.add(text.settings, 'variation',0,2);
+			f1.add(text.settings, 'attraction',-0.5,0.5);
+
+			f2.add(text.settings, 'explosionRadius',0,1000);
+			f2.add(text.settings, 'explosionForce',-0.5,0.5);
+			
+			f3.add(text.settings, 'drawFn', ['circle', 'rectangle']);
+			f3.add(text.settings, 'showForce', [true, false]);
+			f3.add(text.settings, 'showDistance', [true, false]);
+			f3.add(text.settings, 'showEdges', [true, false]);
+			f3.add(text.settings, 'fadeAmount', 0, 1);
+			f3.addColor(text.settings, 'fadeColor');
 			
 			// Write text and choose effect
-			var name = prompt("What's your name?");
-			text.write(name, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
+			//var name = prompt("What's your name?");
+			text.write(null, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
+
+			textController.onFinishChange(function(value) {
+				text.write(value, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
+			});
 			
 			$('canvas').mousemove(function(e){ text.mouseMove(e); });
 			$('canvas').resize(function(e){text.resizeCanvas(); });
