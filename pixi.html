@@ -96,7 +96,9 @@
 				showEdges: false,
 				showNodes: true,
 				variableLineWidth: false,
-				resolution: 28
+				resolution: 28,
+				drag: 0.0001,
+				drawFn: 'rectangle'
 			});
 			
 			// Uncomment block for dat.gui
@@ -130,13 +132,13 @@
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write(null, [0xff00ff]);
+			text.write(null, [0xff00ff, 0xffff00]);
 
 			textController.onFinishChange(function(value) {
 				text.write(value, [0xff00ff, 0xffff00]);
 			});
 			
-			$(document).click(function(e){text.explosion(e); });
+			$('#bg').click(function(e){ text.explosion(e); });
 			
 			$("a[href='#colorful']").click(function(e){
 				e.preventDefault();

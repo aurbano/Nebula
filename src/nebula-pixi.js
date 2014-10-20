@@ -22,12 +22,12 @@ var Nebula = function (options) {
 		maxSpeed: 5,
 		speedReduction: 0.8,
 		variation: 0.2,
-		explosionRadius: 100,
+		explosionRadius: 150,
 		attraction: 0.08, // Attraction towards their real center, based on distance
-		explosionForce: 0.01, // Explosive force
+		explosionForce: 0.05, // Explosive force
 		mode: 'colorful', // Normal or colorful
 		debug: true,
-		drawFn: 'circle',
+		drawFn: 'rectangle',
 		showForce: false,
 		showDistance: false,
 		wait: 10,
@@ -194,16 +194,13 @@ var Nebula = function (options) {
 				}
 				if (found) {
 
-					if (nodes.length > 853) debugger;
-
 					var coords = {
 						x: Math.round((x + nebula.settings.resolution) / 2) * 2,
 						y: Math.round((y + nebula.settings.resolution) / 2) * 2 + canvas.HEIGHT / 2 - content.size / 1.3
 					};
 
 					for (var i = 0; i < colors.length; i++) {
-						if (!recalculating) {
-							if (nodes.length > 853) debugger;
+						if (!recalculating || count >= nodes.length) {
 							nodes.push(graphicsEl(Math.random() * canvas.WIDTH, Math.random() * canvas.HEIGHT, coords.x, coords.y, Math.random() * nebula.settings.maxInitRad, colors[i]));
 						} else {
 							nodes[count].destX = coords.x;
@@ -478,7 +475,17 @@ var Nebula = function (options) {
 			_color = color || 0xffffff;
 
 		graphics.beginFill(_color, _alpha);
-		graphics.drawCircle(x, y, rad);
+
+		switch (nebula.settings.drawFn) {
+		case 'circle':
+			graphics.drawCircle(x, y, rad);
+			break;
+		case 'rectangle':
+		default:
+			graphics.drawRect(x - rad, y - rad, rad * 2, rad * 2);
+			break;
+		}
+
 		graphics.endFill();
 	}
 
