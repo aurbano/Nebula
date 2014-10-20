@@ -272,6 +272,8 @@ var Nebula = function (options) {
 	// Draw randomly growing nodes on each edge
 	nebula.drawNodes = function () {
 
+		requestAnimFrame(nebula.drawNodes);
+
 		circleGraphics.clear();
 		extras.clear();
 
@@ -370,11 +372,11 @@ var Nebula = function (options) {
 
 			// Forces
 			if (nebula.settings.showForce) {
-				var width = 4;
+				var width = 2;
 				if (nebula.settings.variableLineWidth) width *= Math.random();
 				extras.lineStyle(width, 0xff0000, 1);
 				extras.moveTo(nodes[i].x, nodes[i].y);
-				extras.lineTo(nodes[i].x + nodes[i].dx * gravity * 0.1, nodes[i].y + nodes[i].dy * gravity * 0.1);
+				extras.lineTo(nodes[i].x + nodes[i].dx * gravity * 0.5, nodes[i].y + nodes[i].dy * gravity * 0.5);
 			}
 		}
 
@@ -382,8 +384,6 @@ var Nebula = function (options) {
 		if (nebula.settings.modeChanged) nebula.settings.modeChanged = false;
 		if (explode.do) explode.do = false;
 		if (textChanged) textChanged = false;
-
-		requestAnimFrame(nebula.drawNodes);
 
 		// Draw
 		renderer.render(stage);
