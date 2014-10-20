@@ -39,7 +39,8 @@ var Nebula = function (options) {
 		showNodes: true,
 		variableLineWidth: false,
 		drag: 0.001,
-		explosionBlur: 20
+		explosionBlur: 1,
+		maxExplosionBlur: 20
 	};
 
 	nebula.text = 'alex';
@@ -71,8 +72,8 @@ var Nebula = function (options) {
 		explode = {
 			x: null,
 			y: null,
-			do :
-			false
+			done: false,
+			exploding: 0
 		},
 		textChanged = false;
 
@@ -83,6 +84,8 @@ var Nebula = function (options) {
 		circleGraphics = new PIXI.Graphics(),
 		extras = new PIXI.Graphics(),
 		blurFilter = new PIXI.BlurFilter();
+
+	blurFilter.blur = 0;
 
 	stage.addChild(extras);
 	stage.addChild(circleGraphics);
@@ -232,12 +235,10 @@ var Nebula = function (options) {
 	// Generate an explosion at the coordinates defined
 	// by event e
 	nebula.explosion = function (e) {
-		explode = {
-			x: e.pageX,
-			y: e.pageY,
-			do :
-			true
-		}
+		explode.x = e.pageX;
+		explode.y = e.pageY;
+		explode.done = true;
+
 		debug("Explode: ", explode);
 	}
 
@@ -314,7 +315,7 @@ var Nebula = function (options) {
 			if (nodes[i].rad > nebula.settings.maxRad) nodes[i].rad = nebula.settings.maxRad;
 
 			// Update speed if explosion happened nearby
-			if (explode.do) {
+			if (explode.done) {
 				var dx = nodes[i].x - explode.x,
 					dy = nodes[i].y - explode.y,
 					explosion = nebula.distance(dx, dy);
@@ -333,7 +334,9 @@ var Nebula = function (options) {
 					nodes[i].color = '#ffffff';
 					nodes[i].alpha = 1;
 
-					explosionFilter(1);
+					explode.exploding += 0.5;
+
+					circleGraphics.filters = [blurFilter];
 				}
 			}
 
@@ -386,9 +389,31 @@ var Nebula = function (options) {
 			}
 		}
 
+		// Manage explosion blur
+		if (explode.exploding > 0) {
+
+			var amount = nebula.settings.explosionBlur * explode.exploding;
+
+			explode.exploding -= 1;
+
+			if (explode.exploding < 1 || amount < 1) {
+				explode.exploding = 0;
+				amount = 0;
+				blurFilter.blur = 0;
+				circleGraphics.filters = null;
+			} else {
+
+				explode.exploding = Math.min(explode.exploding, nebula.settings.maxExplosionBlur);
+
+				debug("Explosion blur: exploding=" + explode.exploding + ', amount=' + amount);
+
+				blurFilter.blur = amount;
+			}
+		}
+
 		// Reset counters
 		if (nebula.settings.modeChanged) nebula.settings.modeChanged = false;
-		if (explode.do) explode.do = false;
+		if (explode.done) explode.done = false;
 		if (textChanged) textChanged = false;
 	}
 
@@ -410,28 +435,6 @@ var Nebula = function (options) {
 	}
 
 	/* Internal functions */
-
-	function explosionFilter(count) {
-		if (!count || count < 1) count = 1;
-		var amount = nebula.settings.explosionBlur / (count * 0.5);
-
-		debug('explosionFilter: count=' + count + ', amount=' + amount);
-
-		if (amount < 1) {
-			amount = 0;
-			blurFilter.blur = 0;
-			circleGraphics.filters = null;
-			return;
-		}
-
-		circleGraphics.filters = [blurFilter];
-
-		blurFilter.blur = amount;
-
-		setTimeout(function () {
-			explosionFilter(++count);
-		}, 25);
-	}
 
 	function fade() {
 		var color = nebula.settings.fadeColor;
