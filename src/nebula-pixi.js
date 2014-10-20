@@ -38,7 +38,8 @@ var Nebula = function (options) {
 		fadeColor: [0, 0, 0],
 		showNodes: true,
 		variableLineWidth: false,
-		drag: 0.001
+		drag: 0.001,
+		explosionBlur: 20
 	};
 
 	nebula.text = 'alex';
@@ -80,7 +81,8 @@ var Nebula = function (options) {
 	var stage = new PIXI.Stage(0x000000),
 		renderer = PIXI.autoDetectRenderer(canvas.el.width, canvas.el.height, null, false, true),
 		circleGraphics = new PIXI.Graphics(),
-		extras = new PIXI.Graphics();
+		extras = new PIXI.Graphics(),
+		blurFilter = new PIXI.BlurFilter();
 
 	stage.addChild(extras);
 	stage.addChild(circleGraphics);
@@ -328,6 +330,8 @@ var Nebula = function (options) {
 
 					nodes[i].color = '#ffffff';
 					nodes[i].alpha = 1;
+
+					explosionFilter(1);
 				}
 			}
 
@@ -404,6 +408,28 @@ var Nebula = function (options) {
 	}
 
 	/* Internal functions */
+
+	function explosionFilter(count) {
+		if (!count || count < 1) count = 1;
+		var amount = nebula.settings.explosionBlur / (count * 0.5);
+
+		debug('explosionFilter: count=' + count + ', amount=' + amount);
+
+		if (amount < 1) {
+			amount = 0;
+			blurFilter.blur = 0;
+			circleGraphics.filters = null;
+			return;
+		}
+
+		circleGraphics.filters = [blurFilter];
+
+		blurFilter.blur = amount;
+
+		setTimeout(function () {
+			explosionFilter(++count);
+		}, 25);
+	}
 
 	function fade() {
 		var color = nebula.settings.fadeColor;
