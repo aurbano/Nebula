@@ -80,7 +80,7 @@
 				showDistance: true,
 				showForce: false,
 				showEdges: false,
-				showNodes: false,
+				showNodes: true,
 				variableLineWidth: false
 			});
 			
@@ -98,7 +98,7 @@
 			f1.add(text.settings, 'tolerance',0,1);
 			f1.add(text.settings, 'minRad',0,100);
 			f1.add(text.settings, 'maxRad',0,100);
-			f1.add(text.settings, 'maxInitRad',0,1);
+			f1.add(text.settings, 'maxInitRad',0,50);
 			f1.add(text.settings, 'maxSpeed',0,10);
 			f1.add(text.settings, 'variation',0,2);
 			f1.add(text.settings, 'attraction',-0.5,0.5);
@@ -115,7 +115,7 @@
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write(null, [0xff00ff, 0xffff00]);
+			text.write('alex', [0xff00ff]);
 
 			textController.onFinishChange(function(value) {
 				text.write(value, [0xff00ff, 0xffff00]);

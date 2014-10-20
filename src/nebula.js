@@ -298,6 +298,8 @@ var Nebula = function (options) {
 			nodes[i].color = hexToWebgl(rgbToHex(nextColor[0], nextColor[1], nextColor[2]));
 			nodes[i].alpha = Math.max(Math.min(parseFloat(nodes[i].alpha) + Math.cos(Math.random() * 180 * parseFloat(nodes[i].alpha)) * 0.005, 1), 0);
 
+			nodes[i].rad += Math.sin(Math.random() * 180 + i) * nebula.settings.variation;
+
 			if (nodes[i].rad < nebula.settings.minRad) nodes[i].rad = nebula.settings.minRad;
 			if (nodes[i].rad > nebula.settings.maxRad) nodes[i].rad = nebula.settings.maxRad;
 
