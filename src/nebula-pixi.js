@@ -87,6 +87,8 @@ var Nebula = function (options) {
 	stage.addChild(extras);
 	stage.addChild(circleGraphics);
 
+	circleGraphics.blendMode = PIXI.blendModes.ADD;
+
 	// add the renderer view element to the DOM
 	nebula.settings.container.append(renderer.view);
 
