@@ -64,16 +64,20 @@
 
 	<div id="config"><a href="#colorful">Change colors</a></div>
 
-	<canvas width="100%" height="100%" id="bg" style="color:#09F"></canvas>
+	<div width="100%" height="100%" id="bg" style="color:#09F"></div>
 
 	<div style="position:absolute; bottom:20px; left:50%; margin-left:-140px; color:#999; font-size:14px;">Click anywhere for explosions</div>
 
 	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="lib/dat.gui/build/dat.gui.min.js"></script>
+	<script src="lib/pixi/bin/pixi.js"></script>
 	<script type="text/javascript" src="src/nebula.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			var text = new Nebula();
+
+			var text = new Nebula({
+				container: $('#bg')
+			});
 			
 			// Uncomment block for dat.gui
 			var gui = new dat.GUI();
