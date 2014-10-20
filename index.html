@@ -76,7 +76,12 @@
 		$(document).ready(function(){
 
 			var text = new Nebula({
-				container: $('#bg')
+				container: $('#bg'),
+				showDistance: true,
+				showForce: false,
+				showEdges: false,
+				showNodes: false,
+				variableLineWidth: false
 			});
 			
 			// Uncomment block for dat.gui

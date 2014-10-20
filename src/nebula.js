@@ -16,8 +16,8 @@ var Nebula = function (options) {
 		container: $('canvas'),
 		resolution: 20,
 		tolerance: 0, // 0 to 1
-		minRad: 0,
-		maxRad: 40,
+		minRad: 10,
+		maxRad: 50,
 		maxInitRad: 10,
 		maxSpeed: 2,
 		speedReduction: 0.6,
@@ -35,7 +35,9 @@ var Nebula = function (options) {
 		resolutionScale: 35,
 		radLimitScale: 10600,
 		fadeAmount: 0,
-		fadeColor: [0, 0, 0]
+		fadeColor: [0, 0, 0],
+		showNodes: true,
+		variableLineWidth: false
 	};
 
 	nebula.text = 'nebula';
@@ -76,8 +78,10 @@ var Nebula = function (options) {
 	// create an new instance of a pixi stage
 	var stage = new PIXI.Stage(0x000000),
 		renderer = PIXI.autoDetectRenderer(canvas.el.width, canvas.el.height, null, false, true),
-		circleGraphics = new PIXI.Graphics();
+		circleGraphics = new PIXI.Graphics(),
+		extras = new PIXI.Graphics();
 
+	stage.addChild(extras);
 	stage.addChild(circleGraphics);
 
 	// add the renderer view element to the DOM
@@ -121,16 +125,14 @@ var Nebula = function (options) {
 		colors = colorArr;
 
 		if (nodes.length > 0) {
+			debug("Reseting graphics");
 			// Set everything back to default and stop the timer
 			textChanged = true;
-			nodes = [];
 			content = {
 				text: text || nebula.text,
 				recalculate: true,
 				size: 0
 			};
-
-			stage.removeAll();
 		}
 
 		debug('Writing ' + content.text);
@@ -160,6 +162,12 @@ var Nebula = function (options) {
 	}
 
 	nebula.findEdges = function () {
+
+		var recalculating = false;
+		if (nodes.length > 0) recalculating = true;
+
+		var count = 0;
+
 		// Sweep image finding the coordinates of the edges
 		var pix = canvas.ctx.getImageData(0, 0, canvas.WIDTH, canvas.HEIGHT);
 		//
@@ -191,11 +199,28 @@ var Nebula = function (options) {
 					};
 
 					for (var i = 0; i < colors.length; i++) {
-						nodes.push(new graphicsEl(Math.random() * canvas.WIDTH, Math.random() * canvas.HEIGHT, coords.x, coords.y, Math.random() * nebula.settings.maxInitRad, colors[i]));
+						if (!recalculating) {
+							nodes.push(new graphicsEl(Math.random() * canvas.WIDTH, Math.random() * canvas.HEIGHT, coords.x, coords.y, Math.random() * nebula.settings.maxInitRad, colors[i]));
+						} else {
+							nodes[count].destX = coords.x;
+							nodes[count].destY = coords.y;
+
+							count++;
+						}
 					}
 				}
 			}
 		}
+
+		if (recalculating) {
+			var extraNodes = nodes.length - count;
+
+			for (var i = 0; i < extraNodes; i++) {
+				nodes.pop();
+			}
+		}
+
+		nebula.update();
 		clear();
 		nebula.drawNodes();
 	}
@@ -247,11 +272,11 @@ var Nebula = function (options) {
 	// Draw randomly growing nodes on each edge
 	nebula.drawNodes = function () {
 
-		console.time('drawNodes');
-
-		requestAnimFrame(nebula.drawNodes);
-
 		circleGraphics.clear();
+		extras.clear();
+
+		//circleGraphics.beginFill(0xff0000, 0.7);
+		extras.beginFill(0xffffff, 1);
 
 		var total = nodes.length;
 
@@ -260,22 +285,19 @@ var Nebula = function (options) {
 		} else {
 			clear();
 		}*/
-
-		var nextColor, nextAlpha;
-
-		var current = nodes[0].color,
-			c = hexToRgb(webglToHex(current));
-		// And set the color
-		nextColor = [
-			Math.round(Math.max(0, Math.min(parseInt(c[0]) + Math.sin(Math.random() * 180), 255))),
-			Math.round(Math.max(0, Math.min(parseInt(c[1]) + Math.cos(Math.random() * 180), 255))),
-			Math.round(Math.max(0, Math.min(parseInt(c[2]) + Math.sin(Math.random() * 180), 255)))
-		];
-
-		nextColor = rgbToHex(nextColor[0], nextColor[1], nextColor[2]);
-		nextAlpha = Math.max(Math.min(parseFloat(c[3]) + Math.cos(Math.random() * 180 * parseFloat(c[3])) * 0.005, 1), 0);
-
 		for (var i = 0; i < total; i++) {
+
+			var current = nodes[i].color,
+				c = hexToRgb(webglToHex(current)) || hexToRgb(webglToHex(colors[0])),
+				nextColor = [
+			Math.round(Math.max(0, Math.min(parseInt(c[0]) + Math.sin(Math.random() * 180), 255))),
+					Math.round(Math.max(0, Math.min(parseInt(c[1]) + Math.cos(Math.random() * 180), 255))),
+					Math.round(Math.max(0, Math.min(parseInt(c[2]) + Math.sin(Math.random() * 180), 255)))
+				];
+
+			nodes[i].color = hexToWebgl(rgbToHex(nextColor[0], nextColor[1], nextColor[2]));
+			nodes[i].alpha = Math.max(Math.min(parseFloat(nodes[i].alpha) + Math.cos(Math.random() * 180 * parseFloat(nodes[i].alpha)) * 0.005, 1), 0);
+
 			if (nodes[i].rad < nebula.settings.minRad) nodes[i].rad = nebula.settings.minRad;
 			if (nodes[i].rad > nebula.settings.maxRad) nodes[i].rad = nebula.settings.maxRad;
 
@@ -328,6 +350,30 @@ var Nebula = function (options) {
 
 			// Redraw
 			element(circleGraphics, nodes[i].x, nodes[i].y, nodes[i].rad, nodes[i].color, nodes[i].alpha);
+
+			// Mark edges
+			if (nebula.settings.showEdges) {
+				extras.drawRect(nodes[i].destX - 5, nodes[i].destY - 5, 10, 10);
+			}
+
+
+			// Line from center to center
+			if (nebula.settings.showDistance) {
+				var width = 2;
+				if (nebula.settings.variableLineWidth) width *= Math.random();
+				extras.lineStyle(width, 0x00ff00, 1);
+				extras.moveTo(nodes[i].x, nodes[i].y);
+				extras.lineTo(nodes[i].destX, nodes[i].destY);
+			}
+
+			// Forces
+			if (nebula.settings.showForce) {
+				var width = 4;
+				if (nebula.settings.variableLineWidth) width *= Math.random();
+				extras.lineStyle(width, 0xff0000, 1);
+				extras.moveTo(nodes[i].x, nodes[i].y);
+				extras.lineTo(nodes[i].x + nodes[i].dx * gravity * 0.1, nodes[i].y + nodes[i].dy * gravity * 0.1);
+			}
 		}
 
 		// Reset counters
@@ -335,53 +381,59 @@ var Nebula = function (options) {
 		if (explode.do) explode.do = false;
 		if (textChanged) textChanged = false;
 
-
-
-		console.timeEnd('drawNodes');
-
-		//console.time('render');
+		requestAnimFrame(nebula.drawNodes);
 
 		// Draw
 		renderer.render(stage);
 
-		//console.timeEnd('render');
-
 	}
-
-	var extras = new PIXI.Graphics();
-
-	extras.beginFill(0xffffff, 0.7),
-	stage.addChild(extras);
 
 	nebula.update = function () {
 		var total = nodes.length;
 
 		extras.clear();
+		extras.beginFill(0xffffff, 1);
 
 		for (var i = 0; i < total; i++) {
 			// Mark edges
 			if (nebula.settings.showEdges) {
-				extras.drawRect(nodes[i].destX, nodes[i].destY, 10, 10);
+
+				extras.drawRect(nodes[i].destX - 5, nodes[i].destY - 5, 10, 10);
 			}
 
 
 			// Line from center to center
 			if (nebula.settings.showDistance) {
-				extras.lineStyle(1, 0xffffff, 0.01);
+				extras.lineStyle(2, 0x00ff00, 1);
 				extras.moveTo(nodes[i].x, nodes[i].y);
 				extras.lineTo(nodes[i].destX, nodes[i].destY);
 			}
 
 			// Forces
 			if (nebula.settings.showForce) {
-				extras.lineStyle(1, 0xff0000, 0.01);
+				// Attraction delta, vector from circle center to real center
+				var delta = {
+					x: nodes[i].destX - nodes[i].x,
+					y: nodes[i].destY - nodes[i].y
+				};
+
+				// Calculate vector force based on distance from centers
+				var gravity = nebula.distance(delta.x, delta.y);
+
+				extras.lineStyle(4, 0xff0000, 1);
 				extras.moveTo(nodes[i].x, nodes[i].y);
 				extras.lineTo(nodes[i].x + nodes[i].dx * gravity * 0.1, nodes[i].y + nodes[i].dy * gravity * 0.1);
 			}
 		}
-	}
 
-	nebula.update();
+		nebula.updateNode = function (node) {
+
+		}
+
+		extras.endFill(0xffffff, 1);
+
+		renderer.render(stage);
+	}
 
 	/* Drawing functions */
 
@@ -419,7 +471,15 @@ var Nebula = function (options) {
 	}
 
 	function webglToHex(webglColor) {
-		return '#' + webglColor.toString(16);
+		if (webglColor < 0) {
+			webglColor = 0xFFFFFFFF + webglColor + 1;
+		}
+
+		return '#' + webglColor.toString(16).toUpperCase();
+	}
+
+	function hexToWebgl(hex) {
+		return parseInt(hex.substr(1), 16);
 	}
 
 	function hexToRgb(hex) {
@@ -430,11 +490,11 @@ var Nebula = function (options) {
 		});
 
 		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-		return result ? {
-			r: parseInt(result[1], 16),
-			g: parseInt(result[2], 16),
-			b: parseInt(result[3], 16)
-		} : null;
+		return result ? [
+			parseInt(result[1], 16),
+			parseInt(result[2], 16),
+			parseInt(result[3], 16)
+		] : null;
 	}
 
 	function debug() {
@@ -448,21 +508,25 @@ var Nebula = function (options) {
 			x: x,
 			y: y,
 			color: color,
+			alpha: 0.7,
 			destX: destX,
 			destY: destY,
 			rad: rad
 		};
-		circleGraphics.beginFill(color, 0.7);
-		element(circleGraphics, x, y, rad);
+
+		//element(circleGraphics, x, y, rad, color, 0.7);
 
 		return el;
 	}
 
 	function element(graphics, x, y, rad, color, alpha) {
+		if (!nebula.settings.showNodes) return;
 		_alpha = alpha || 0.7;
 		_color = color || 0xffffff;
+
 		graphics.beginFill(_color, _alpha);
 		graphics.drawCircle(x, y, rad);
+		graphics.endFill();
 	}
 
 	return nebula;
