@@ -78,10 +78,11 @@
 			var text = new Nebula({
 				container: $('#bg'),
 				showDistance: false,
-				showForce: true,
+				showForce: false,
 				showEdges: false,
-				showNodes: false,
-				variableLineWidth: false
+				showNodes: true,
+				variableLineWidth: false,
+				resolution: 28
 			});
 			
 			// Uncomment block for dat.gui
@@ -115,7 +116,7 @@
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write('alex', [0xff00ff]);
+			text.write(null, [0xff00ff]);
 
 			textController.onFinishChange(function(value) {
 				text.write(value, [0xff00ff, 0xffff00]);

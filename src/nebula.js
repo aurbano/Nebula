@@ -16,14 +16,14 @@ var Nebula = function (options) {
 		container: $('canvas'),
 		resolution: 20,
 		tolerance: 0, // 0 to 1
-		minRad: 10,
-		maxRad: 50,
-		maxInitRad: 10,
-		maxSpeed: 2,
-		speedReduction: 0.6,
+		minRad: 3,
+		maxRad: 60,
+		maxInitRad: 2,
+		maxSpeed: 5,
+		speedReduction: 0.8,
 		variation: 0.2,
 		explosionRadius: 100,
-		attraction: 0.1, // Attraction towards their real center, based on distance
+		attraction: 0.08, // Attraction towards their real center, based on distance
 		explosionForce: 0.01, // Explosive force
 		mode: 'colorful', // Normal or colorful
 		debug: true,
@@ -37,10 +37,11 @@ var Nebula = function (options) {
 		fadeAmount: 0,
 		fadeColor: [0, 0, 0],
 		showNodes: true,
-		variableLineWidth: false
+		variableLineWidth: false,
+		drag: 0.001
 	};
 
-	nebula.text = 'nebula';
+	nebula.text = 'alex';
 
 	nebula.settings = $.extend(nebula.settings, options);
 
@@ -101,7 +102,7 @@ var Nebula = function (options) {
 				content.size++;
 			} while (textSize.width < canvas.WIDTH && content.size < canvas.HEIGHT);
 			// Size done, recalculating resolution
-			nebula.settings.resolution = Math.ceil(content.size / nebula.settings.resolutionScale);
+			//nebula.settings.resolution = Math.ceil(content.size / nebula.settings.resolutionScale);
 			nebula.settings.maxRad = Math.ceil(nebula.settings.radLimitScale / content.size);
 			debug('Using resolution: ' + nebula.settings.resolution);
 		}
@@ -193,6 +194,8 @@ var Nebula = function (options) {
 				}
 				if (found) {
 
+					if (nodes.length > 853) debugger;
+
 					var coords = {
 						x: Math.round((x + nebula.settings.resolution) / 2) * 2,
 						y: Math.round((y + nebula.settings.resolution) / 2) * 2 + canvas.HEIGHT / 2 - content.size / 1.3
@@ -200,7 +203,8 @@ var Nebula = function (options) {
 
 					for (var i = 0; i < colors.length; i++) {
 						if (!recalculating) {
-							nodes.push(new graphicsEl(Math.random() * canvas.WIDTH, Math.random() * canvas.HEIGHT, coords.x, coords.y, Math.random() * nebula.settings.maxInitRad, colors[i]));
+							if (nodes.length > 853) debugger;
+							nodes.push(graphicsEl(Math.random() * canvas.WIDTH, Math.random() * canvas.HEIGHT, coords.x, coords.y, Math.random() * nebula.settings.maxInitRad, colors[i]));
 						} else {
 							nodes[count].destX = coords.x;
 							nodes[count].destY = coords.y;
@@ -220,7 +224,6 @@ var Nebula = function (options) {
 			}
 		}
 
-		nebula.update();
 		clear();
 		nebula.drawNodes();
 	}
@@ -269,16 +272,20 @@ var Nebula = function (options) {
 		return 1.426776695 * Math.min(0.7071067812 * (Math.abs(dx) + Math.abs(dy)), Math.max(Math.abs(dx), Math.abs(dy)));
 	}
 
-	// Draw randomly growing nodes on each edge
 	nebula.drawNodes = function () {
-
 		requestAnimFrame(nebula.drawNodes);
 
+		nebula.updateNodes();
+
+		renderer.render(stage);
+	}
+
+	// Draw randomly growing nodes on each edge
+	nebula.updateNodes = function () {
 		circleGraphics.clear();
 		extras.clear();
 
-		//circleGraphics.beginFill(0xff0000, 0.7);
-		extras.beginFill(0xffffff, 1);
+		extras.beginFill(0xffffff, 0.1);
 
 		var total = nodes.length;
 
@@ -292,7 +299,7 @@ var Nebula = function (options) {
 			var current = nodes[i].color,
 				c = hexToRgb(webglToHex(current)) || hexToRgb(webglToHex(colors[0])),
 				nextColor = [
-			Math.round(Math.max(0, Math.min(parseInt(c[0]) + Math.sin(Math.random() * 180), 255))),
+					Math.round(Math.max(0, Math.min(parseInt(c[0]) + Math.sin(Math.random() * 180), 255))),
 					Math.round(Math.max(0, Math.min(parseInt(c[1]) + Math.cos(Math.random() * 180), 255))),
 					Math.round(Math.max(0, Math.min(parseInt(c[2]) + Math.sin(Math.random() * 180), 255)))
 				];
@@ -340,14 +347,9 @@ var Nebula = function (options) {
 			// Calculate vector force based on distance from centers
 			var gravity = nebula.distance(delta.x, delta.y);
 
-			// Attraction force
-			var force = {
-				x: delta.x * gravity * nebula.settings.attraction * 0.0001 * nodes[i].rad * Math.random(),
-				y: delta.y * gravity * nebula.settings.attraction * 0.0001 * nodes[i].rad * Math.random()
-			};
 			// Update speed
-			nodes[i].dx += force.x;
-			nodes[i].dy += force.y;
+			nodes[i].dx += delta.x * gravity * nebula.settings.attraction * 0.0001 * nodes[i].rad * Math.random() - nebula.settings.drag * nodes[i].dx * nodes[i].rad;
+			nodes[i].dy += delta.y * gravity * nebula.settings.attraction * 0.0001 * nodes[i].rad * Math.random() - nebula.settings.drag * nodes[i].dy * nodes[i].rad;
 
 			if (nodes[i].dx > nebula.settings.maxSpeed) nodes[i].dx *= nebula.settings.speedReduction;
 			if (nodes[i].dy > nebula.settings.maxSpeed) nodes[i].dy *= nebula.settings.speedReduction;
@@ -357,15 +359,16 @@ var Nebula = function (options) {
 
 			// Mark edges
 			if (nebula.settings.showEdges) {
+				extras.lineStyle(1, 0xffffff, 0.3);
 				extras.drawRect(nodes[i].destX - 5, nodes[i].destY - 5, 10, 10);
 			}
 
 
 			// Line from center to center
 			if (nebula.settings.showDistance) {
-				var width = 2;
+				var width = 1;
 				if (nebula.settings.variableLineWidth) width *= Math.random();
-				extras.lineStyle(width, 0x00ff00, 1);
+				extras.lineStyle(width, 0x00ff00, 0.3);
 				extras.moveTo(nodes[i].x, nodes[i].y);
 				extras.lineTo(nodes[i].destX, nodes[i].destY);
 			}
@@ -374,7 +377,7 @@ var Nebula = function (options) {
 			if (nebula.settings.showForce) {
 				var width = 2;
 				if (nebula.settings.variableLineWidth) width *= Math.random();
-				extras.lineStyle(width, 0xff0000, 1);
+				extras.lineStyle(width, 0xff0000, 0.3);
 				extras.moveTo(nodes[i].x, nodes[i].y);
 				extras.lineTo(nodes[i].x + nodes[i].dx * gravity * 0.5, nodes[i].y + nodes[i].dy * gravity * 0.5);
 			}
@@ -384,57 +387,6 @@ var Nebula = function (options) {
 		if (nebula.settings.modeChanged) nebula.settings.modeChanged = false;
 		if (explode.do) explode.do = false;
 		if (textChanged) textChanged = false;
-
-		// Draw
-		renderer.render(stage);
-
-	}
-
-	nebula.update = function () {
-		var total = nodes.length;
-
-		extras.clear();
-		extras.beginFill(0xffffff, 1);
-
-		for (var i = 0; i < total; i++) {
-			// Mark edges
-			if (nebula.settings.showEdges) {
-
-				extras.drawRect(nodes[i].destX - 5, nodes[i].destY - 5, 10, 10);
-			}
-
-
-			// Line from center to center
-			if (nebula.settings.showDistance) {
-				extras.lineStyle(2, 0x00ff00, 1);
-				extras.moveTo(nodes[i].x, nodes[i].y);
-				extras.lineTo(nodes[i].destX, nodes[i].destY);
-			}
-
-			// Forces
-			if (nebula.settings.showForce) {
-				// Attraction delta, vector from circle center to real center
-				var delta = {
-					x: nodes[i].destX - nodes[i].x,
-					y: nodes[i].destY - nodes[i].y
-				};
-
-				// Calculate vector force based on distance from centers
-				var gravity = nebula.distance(delta.x, delta.y);
-
-				extras.lineStyle(4, 0xff0000, 1);
-				extras.moveTo(nodes[i].x, nodes[i].y);
-				extras.lineTo(nodes[i].x + nodes[i].dx * gravity * 0.1, nodes[i].y + nodes[i].dy * gravity * 0.1);
-			}
-		}
-
-		nebula.updateNode = function (node) {
-
-		}
-
-		extras.endFill(0xffffff, 1);
-
-		renderer.render(stage);
 	}
 
 	/* Drawing functions */
@@ -516,15 +468,14 @@ var Nebula = function (options) {
 			rad: rad
 		};
 
-		//element(circleGraphics, x, y, rad, color, 0.7);
-
 		return el;
 	}
 
 	function element(graphics, x, y, rad, color, alpha) {
 		if (!nebula.settings.showNodes) return;
-		_alpha = alpha || 0.7;
-		_color = color || 0xffffff;
+
+		var _alpha = alpha || 0.7,
+			_color = color || 0xffffff;
 
 		graphics.beginFill(_color, _alpha);
 		graphics.drawCircle(x, y, rad);
