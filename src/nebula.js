@@ -18,8 +18,9 @@ var Nebula = function (options) {
 		tolerance: 0, // 0 to 1
 		minRad: 0,
 		maxRad: 40,
-		maxInitRad: 0.001,
+		maxInitRad: 10,
 		maxSpeed: 2,
+		speedReduction: 0.6,
 		variation: 0.2,
 		explosionRadius: 100,
 		attraction: 0.1, // Attraction towards their real center, based on distance
@@ -55,23 +56,12 @@ var Nebula = function (options) {
 	canvas.el.height = nebula.settings.container.height();
 	canvas.ctx = canvas.el.getContext('2d');
 
-	var mouse = {
-			// Mouse speed
-			s: {
-				x: 0,
-				y: 0
-			},
-			// Mouse position
-			p: {
-				x: 0,
-				y: 0
-			}
-		},
-		content = {
+	var content = {
 			text: null,
 			recalculate: true,
 			size: 0
 		},
+		colors = [],
 		nodes = [],
 		modeChanged = true,
 		explode = {
@@ -89,10 +79,6 @@ var Nebula = function (options) {
 
 	// add the renderer view element to the DOM
 	nebula.settings.container.append(renderer.view);
-
-	requestAnimFrame(animate);
-
-	var circle = new element(100, 100, 34, 34, 10, webGLcolor('#ff0000'));
 
 	function animate() {
 
@@ -135,10 +121,12 @@ var Nebula = function (options) {
 		callback.call();
 	}
 
-	nebula.write = function (text, colors) {
+	nebula.write = function (text, colorArr) {
 		// Store text
 		content.text = text || nebula.text;
 		nebula.text = content.text;
+
+		colors = colorArr;
 
 		if (nodes.length > 0) {
 			// Set everything back to default and stop the timer
@@ -157,7 +145,7 @@ var Nebula = function (options) {
 		nebula.resizeCanvas();
 		clear();
 		nebula.drawText(function () {
-			nebula.findEdges(colors);
+			nebula.findEdges();
 		});
 	}
 
@@ -175,19 +163,11 @@ var Nebula = function (options) {
 		return 'rgba(' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.round(Math.random() * 255) + ',' + Math.random() + ')';
 	}
 
-	nebula.mouseMove = function (e) {
-		mouse.s.x = Math.max(Math.min(e.pageX - mouse.p.x, 40), -40);
-		mouse.s.y = Math.max(Math.min(e.pageY - mouse.p.y, 40), -40);
-
-		mouse.p.x = e.pageX - canvas.canvasMinX;
-		mouse.p.y = e.pageY - canvas.canvasMinY;
-	}
-
 	nebula.logCoords = function (e) {
 		debug([e.pageX - canvas.canvasMinX, e.pageY - canvas.canvasMinY]);
 	}
 
-	nebula.findEdges = function (colors) {
+	nebula.findEdges = function () {
 		debug('Finding edges');
 		// Sweep image finding the coordinates of the edges
 		var pix = canvas.ctx.getImageData(0, 0, canvas.WIDTH, canvas.HEIGHT);
@@ -207,7 +187,6 @@ var Nebula = function (options) {
 						points++;
 					}
 					auxAvg = auxAvg / points;
-					//if(auxAvg>0) debug(auxAvg);
 					if (auxAvg > 0 && auxAvg < 255 - (255 * nebula.settings.tolerance)) {
 						found = true;
 						break;
@@ -221,14 +200,13 @@ var Nebula = function (options) {
 					};
 
 					for (var i = 0; i < colors.length; i++) {
-						nodes.push(new element(Math.random() * canvas.WIDTH, Math.random() * canvas.HEIGHT, coords.x, coords.y, Math.random() * nebula.settings.maxInitRad, colors[i]));
+						nodes.push(new graphicsEl(Math.random() * canvas.WIDTH, Math.random() * canvas.HEIGHT, coords.x, coords.y, Math.random() * nebula.settings.maxInitRad, colors[i]));
 					}
 				}
 			}
 		}
-		debug(nodes);
 		clear();
-		nebula.drawNodes(colors);
+		nebula.drawNodes();
 	}
 
 	// Generate an explosion at the coordinates defined
@@ -276,65 +254,68 @@ var Nebula = function (options) {
 	}
 
 	// Draw randomly growing nodes on each edge
-	nebula.drawNodes = function (colors) {
+	nebula.drawNodes = function () {
+
+		requestAnimFrame(nebula.drawNodes);
 
 		var total = nodes.length;
 
-		if (nebula.settings.fadeAmount > 0) {
+		/*if (nebula.settings.fadeAmount > 0) {
 			fade();
 		} else {
 			clear();
-		}
+		}*/
 
-		var nextColor;
-		if (nebula.settings.modeChanged) {
-			nextColor = colors[a];
-			if (nebula.settings.mode == 'colorful') nextColor = nebula.newColor();
-		} else {
-			// Mutate the color a little bit
-			var current = nodes[a][0].color,
-				c = current.substring(current.indexOf('(') + 1, current.lastIndexOf(')')).split(/,\s*/);
-			// And set the color
-			nextColor = 'rgba(' + Math.round(Math.max(0, Math.min(parseInt(c[0]) + Math.sin(Math.random() * 180), 255))) + ',' + Math.round(Math.max(0, Math.min(parseInt(c[1]) + Math.cos(Math.random() * 180), 255))) + ',' + Math.round(Math.max(0, Math.min(parseInt(c[2]) + Math.sin(Math.random() * 180), 255))) + ',' + Math.max(Math.min(parseFloat(c[3]) + Math.cos(Math.random() * 180 * parseFloat(c[3])) * 0.005, 1), 0) + ')';
-		}
-		nextColor = webGLcolor(nextColor);
+		var nextColor, nextAlpha;
+
+		var current = nodes[0].color,
+			c = current.substring(current.indexOf('(') + 1, current.lastIndexOf(')')).split(/,\s*/);
+		// And set the color
+		nextColor = [
+			Math.round(Math.max(0, Math.min(parseInt(c[0]) + Math.sin(Math.random() * 180), 255))),
+			Math.round(Math.max(0, Math.min(parseInt(c[1]) + Math.cos(Math.random() * 180), 255))),
+			Math.round(Math.max(0, Math.min(parseInt(c[2]) + Math.sin(Math.random() * 180), 255)))
+		];
+
+		nextColor = rgbToHex(nextColor[0], nextColor[1], nextColor[2]);
+		nextAlpha = Math.max(Math.min(parseFloat(c[3]) + Math.cos(Math.random() * 180 * parseFloat(c[3])) * 0.005, 1), 0);
 
 		for (var i = 0; i < total; i++) {
-			// Handle color changes
-			nodes[a][i].graphics.clear();
+			nodes[i].graphics.clear();
 
-			if (nodes[a][i].rad < nebula.settings.minRad) nodes[a][i].rad = nebula.settings.minRad;
-			if (nodes[a][i].rad > nebula.settings.maxRad) nodes[a][i].rad = nebula.settings.maxRad;
+			if (nodes[i].rad < nebula.settings.minRad) nodes[i].rad = nebula.settings.minRad;
+			if (nodes[i].rad > nebula.settings.maxRad) nodes[i].rad = nebula.settings.maxRad;
 
 			// Update speed if explosion happened nearby
 			if (explode.do) {
-				var dx = nodes[a][i].x - explode.x,
-					dy = nodes[a][i].y - explode.y,
+				var dx = nodes[i].x - explode.x,
+					dy = nodes[i].y - explode.y,
 					explosion = nebula.distance(dx, dy);
 				if (explosion < nebula.settings.explosionRadius) {
 					// The force vector is away from the explosion center
 					// and the explosion force is based on the distance to it
 					var force = {
-						x: dx * explosion * nebula.settings.explosionForce / nodes[a][i].rad,
-						y: dy * explosion * nebula.settings.explosionForce / nodes[a][i].rad
+						x: dx * explosion * nebula.settings.explosionForce / nodes[i].rad,
+						y: dy * explosion * nebula.settings.explosionForce / nodes[i].rad
 					};
 
 					// Update speed
-					nodes[a][i].dx = force.x;
-					nodes[a][i].dy = force.y;
+					nodes[i].dx = force.x;
+					nodes[i].dy = force.y;
 
-					nodes[a][i].color = 'rgba(255,255,255,1)';
+					nodes[i].color = '#ffffff';
+					nodes[i].alpha = 1;
 				}
 			}
 
 			// Update position
-			nodes[a][i].x += nodes[a][i].dx;
-			nodes[a][i].y += nodes[a][i].dy;
+			nodes[i].x += nodes[i].dx;
+			nodes[i].y += nodes[i].dy;
 
 			// Attraction delta, vector from circle center to real center
 			var delta = {
-				x: edges[i][0] - nodes[a][i].x,
-				y: edges[i][1] - nodes[a][i].y
+				x: nodes[i].destX - nodes[i].x,
+				y: nodes[i].destY - nodes[i].y
 			};
 
 			// Calculate vector force based on distance from centers
@@ -342,66 +323,64 @@ var Nebula = function (options) {
 
 			// Attraction force
 			var force = {
-				x: delta.x * gravity * nebula.settings.attraction * 0.0001 * nodes[a][i].rad * Math.random(),
-				y: delta.y * gravity * nebula.settings.attraction * 0.0001 * nodes[a][i].rad * Math.random()
+				x: delta.x * gravity * nebula.settings.attraction * 0.0001 * nodes[i].rad * Math.random(),
+				y: delta.y * gravity * nebula.settings.attraction * 0.0001 * nodes[i].rad * Math.random()
 			};
 			// Update speed
-			nodes[a][i].dx += force.x;
-			nodes[a][i].dy += force.y;
+			nodes[i].dx += force.x;
+			nodes[i].dy += force.y;
 
-			if (nodes[a][i].dx > nebula.settings.maxSpeed) nodes[a][i].dx = nebula.settings.maxSpeed;
-			if (nodes[a][i].dy > nebula.settings.maxSpeed) nodes[a][i].dy = nebula.settings.maxSpeed;
+			if (nodes[i].dx > nebula.settings.maxSpeed) nodes[i].dx *= nebula.settings.speedReduction;
+			if (nodes[i].dy > nebula.settings.maxSpeed) nodes[i].dy *= nebula.settings.speedReduction;
 
+			// Redraw
+			element(nodes[i].graphics, nodes[i].x, nodes[i].y, nodes[i].rad, nodes[i].color, nodes[i].alpha);
+		}
+
+		// Reset counters
+		if (nebula.settings.modeChanged) nebula.settings.modeChanged = false;
+		if (explode.do) explode.do = false;
+		if (textChanged) textChanged = false;
+
+		// Draw
+		renderer.render(stage);
+
+	}
+
+	var extras = new PIXI.Graphics();
+
+	extras.beginFill(webGLcolor('#ffffff'), 0.7),
+	stage.addChild(extras);
+
+	nebula.update = function () {
+		var total = nodes.length;
+
+		extras.clear();
+
+		for (var i = 0; i < total; i++) {
 			// Mark edges
 			if (nebula.settings.showEdges) {
-				drawingFn.rectangle(edges[i][0], edges[i][1], 10, 'rgba(255,255,255,0.01)', canvas);
+				extras.drawRect(nodes[i].destX, nodes[i].destY, 10, 10);
 			}
 
 
 			// Line from center to center
 			if (nebula.settings.showDistance) {
-				canvas.ctx.strokeStyle = 'rgba(255,255,255,0.01)';
-				canvas.ctx.moveTo(edges[i][0], edges[i][1]);
-				canvas.ctx.lineTo(nodes[a][i].x, nodes[a][i].y);
-				canvas.ctx.stroke();
+				extras.lineStyle(1, webGLcolor('#ffffff'), 0.01);
+				extras.moveTo(nodes[i].x, nodes[i].y);
+				extras.lineTo(nodes[i].destX, nodes[i].destY);
 			}
 
 			// Forces
 			if (nebula.settings.showForce) {
-				canvas.ctx.strokeStyle = 'rgba(0,255,0,0.01)';
-				canvas.ctx.moveTo(nodes[a][i].x, nodes[a][i].y);
-				canvas.ctx.lineTo(nodes[a][i].x + nodes[a][i].dx * gravity * 0.1, nodes[a][i].y + nodes[a][i].dy * gravity * 0.1);
-				canvas.ctx.stroke();
+				extras.lineStyle(1, webGLcolor('#ff0000'), 0.01);
+				extras.moveTo(nodes[i].x, nodes[i].y);
+				extras.lineTo(nodes[i].x + nodes[i].dx * gravity * 0.1, nodes[i].y + nodes[i].dy * gravity * 0.1);
 			}
-
-
-			// Draw
-			if (typeof nebula.settings.drawFn === 'function') {
-				nebula.settings.drawFn(nodes[a][i].x, nodes[a][i].y, nodes[a][i].rad, nodes[a][i].color, canvas);
-			} else {
-				var fn = drawingFn[nebula.settings.drawFn];
-				if (typeof fn === 'function') {
-					fn(nodes[a][i].x, nodes[a][i].y, nodes[a][i].rad, nodes[a][i].color, canvas);
-				} else {
-					console.error("The drawing function specified is invalid");
-					return;
-				}
-			}
-
 		}
-		if (nebula.settings.modeChanged) nebula.settings.modeChanged = false;
-		if (explode.do) explode.do = false;
-
-		if (!textChanged) {
-			setTimeout(function () {
-				nebula.drawNodes(colors, nodes);
-			}, nebula.settings.wait);
-		} else {
-			textChanged = false;
-		}
-
-
 	}
+
+	nebula.update();
 
 	/* Drawing functions */
 
@@ -433,13 +412,24 @@ var Nebula = function (options) {
 		canvas.ctx.clearRect(0, 0, canvas.WIDTH, canvas.HEIGHT);
 	}
 
-	function getRGB(color) {
-		var rgb = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-		return {
-			r: rgb[1],
-			g: rgb[2],
-			b: rgb[3]
-		};
+	// Color functions from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+	function rgbToHex(r, g, b) {
+		return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+	}
+
+	function hexToRgb(hex) {
+		// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+		var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+		hex = hex.replace(shorthandRegex, function (m, r, g, b) {
+			return r + r + g + g + b + b;
+		});
+
+		var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+		return result ? {
+			r: parseInt(result[1], 16),
+			g: parseInt(result[2], 16),
+			b: parseInt(result[3], 16)
+		} : null;
 	}
 
 	function webGLcolor(hex) {
@@ -452,18 +442,27 @@ var Nebula = function (options) {
 
 	function graphicsEl(x, y, destX, destY, rad, color) {
 		var el = {
+			dx: 0,
+			dy: 0,
+			x: x,
+			y: y,
+			color: color,
 			destX: destX,
 			destY: destY,
+			rad: rad,
 			graphics: new PIXI.Graphics()
 		};
-		el.graphics.beginFill(color, 0.7);
-		el.graphics.drawCircle(x, y, rad);
+		el.graphics.beginFill(webGLcolor(color), 0.7);
+		element(el.graphics, x, y, rad)
 		stage.addChild(el.graphics);
 
 		return el;
 	}
 
-	function element(graphics, x, y, rad) {
+	function element(graphics, x, y, rad, color, alpha) {
+		_alpha = alpha || 0.7;
+		_color = color || '#ffffff';
+		graphics.beginFill(webGLcolor(_color), _alpha);
 		graphics.drawCircle(x, y, rad);
 	}
 

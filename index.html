@@ -68,7 +68,7 @@
 
 	<div style="position:absolute; bottom:20px; left:50%; margin-left:-140px; color:#999; font-size:14px;">Click anywhere for explosions</div>
 
-	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="lib/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="lib/dat.gui/build/dat.gui.min.js"></script>
 	<script src="lib/pixi/bin/pixi.js"></script>
 	<script type="text/javascript" src="src/nebula.js"></script>
@@ -110,15 +110,13 @@
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write(null, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
+			text.write(null, ['#ff00ff', '#ffff00']);
 
 			textController.onFinishChange(function(value) {
-				text.write(value, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
+				text.write(value, ['#ff00ff', '#ffff00']);
 			});
 			
-			$('canvas').mousemove(function(e){ text.mouseMove(e); });
-			$('canvas').resize(function(e){text.resizeCanvas(); });
-			$('canvas').click(function(e){text.explosion(e); });
+			$(document).click(function(e){text.explosion(e); });
 			
 			$("a[href='#colorful']").click(function(e){
 				e.preventDefault();
