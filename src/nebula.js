@@ -83,17 +83,6 @@ var Nebula = function (options) {
 	// add the renderer view element to the DOM
 	nebula.settings.container.append(renderer.view);
 
-	function animate() {
-
-		circle.graphics.position.x += Math.random() * Math.cos(Math.random() * 360);
-		circle.graphics.position.y += Math.random() * Math.cos(Math.random() * 360);
-
-		requestAnimFrame(animate);
-
-		// render the stage   
-		renderer.render(stage);
-	}
-
 	// METHODS
 	nebula.drawText = function (callback) {
 		debug('drawText');
@@ -258,7 +247,7 @@ var Nebula = function (options) {
 	// Draw randomly growing nodes on each edge
 	nebula.drawNodes = function () {
 
-		//console.time('drawNodes');
+		console.time('drawNodes');
 
 		requestAnimFrame(nebula.drawNodes);
 
@@ -275,7 +264,7 @@ var Nebula = function (options) {
 		var nextColor, nextAlpha;
 
 		var current = nodes[0].color,
-			c = current.substring(current.indexOf('(') + 1, current.lastIndexOf(')')).split(/,\s*/);
+			c = hexToRgb(webglToHex(current));
 		// And set the color
 		nextColor = [
 			Math.round(Math.max(0, Math.min(parseInt(c[0]) + Math.sin(Math.random() * 180), 255))),
@@ -346,7 +335,9 @@ var Nebula = function (options) {
 		if (explode.do) explode.do = false;
 		if (textChanged) textChanged = false;
 
-		//console.timeEnd('drawNodes');
+
+
+		console.timeEnd('drawNodes');
 
 		//console.time('render');
 
@@ -359,7 +350,7 @@ var Nebula = function (options) {
 
 	var extras = new PIXI.Graphics();
 
-	extras.beginFill(webGLcolor('#ffffff'), 0.7),
+	extras.beginFill(0xffffff, 0.7),
 	stage.addChild(extras);
 
 	nebula.update = function () {
@@ -376,14 +367,14 @@ var Nebula = function (options) {
 
 			// Line from center to center
 			if (nebula.settings.showDistance) {
-				extras.lineStyle(1, webGLcolor('#ffffff'), 0.01);
+				extras.lineStyle(1, 0xffffff, 0.01);
 				extras.moveTo(nodes[i].x, nodes[i].y);
 				extras.lineTo(nodes[i].destX, nodes[i].destY);
 			}
 
 			// Forces
 			if (nebula.settings.showForce) {
-				extras.lineStyle(1, webGLcolor('#ff0000'), 0.01);
+				extras.lineStyle(1, 0xff0000, 0.01);
 				extras.moveTo(nodes[i].x, nodes[i].y);
 				extras.lineTo(nodes[i].x + nodes[i].dx * gravity * 0.1, nodes[i].y + nodes[i].dy * gravity * 0.1);
 			}
@@ -427,6 +418,10 @@ var Nebula = function (options) {
 		return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 	}
 
+	function webglToHex(webglColor) {
+		return '#' + webglColor.toString(16);
+	}
+
 	function hexToRgb(hex) {
 		// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 		var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
@@ -440,10 +435,6 @@ var Nebula = function (options) {
 			g: parseInt(result[2], 16),
 			b: parseInt(result[3], 16)
 		} : null;
-	}
-
-	function webGLcolor(hex) {
-		return eval('0x' + hex.substr(1))
 	}
 
 	function debug() {
@@ -461,7 +452,7 @@ var Nebula = function (options) {
 			destY: destY,
 			rad: rad
 		};
-		circleGraphics.beginFill(webGLcolor(color), 0.7);
+		circleGraphics.beginFill(color, 0.7);
 		element(circleGraphics, x, y, rad);
 
 		return el;
@@ -469,8 +460,8 @@ var Nebula = function (options) {
 
 	function element(graphics, x, y, rad, color, alpha) {
 		_alpha = alpha || 0.7;
-		_color = color || '#ffffff';
-		graphics.beginFill(webGLcolor(_color), _alpha);
+		_color = color || 0xffffff;
+		graphics.beginFill(_color, _alpha);
 		graphics.drawCircle(x, y, rad);
 	}
 

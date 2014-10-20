@@ -110,10 +110,10 @@
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write(null, ['#ff00ff', '#ffff00']);
+			text.write(null, [0xff00ff, 0xffff00]);
 
 			textController.onFinishChange(function(value) {
-				text.write(value, ['#ff00ff', '#ffff00']);
+				text.write(value, [0xff00ff, 0xffff00]);
 			});
 			
 			$(document).click(function(e){text.explosion(e); });
