@@ -75,7 +75,10 @@ var Nebula = function (options) {
 	// Setup pixi
 	// create an new instance of a pixi stage
 	var stage = new PIXI.Stage(0x000000),
-		renderer = PIXI.autoDetectRenderer(canvas.el.width, canvas.el.height, null, false, true);
+		renderer = PIXI.autoDetectRenderer(canvas.el.width, canvas.el.height, null, false, true),
+		circleGraphics = new PIXI.Graphics();
+
+	stage.addChild(circleGraphics);
 
 	// add the renderer view element to the DOM
 	nebula.settings.container.append(renderer.view);
@@ -168,7 +171,6 @@ var Nebula = function (options) {
 	}
 
 	nebula.findEdges = function () {
-		debug('Finding edges');
 		// Sweep image finding the coordinates of the edges
 		var pix = canvas.ctx.getImageData(0, 0, canvas.WIDTH, canvas.HEIGHT);
 		//
@@ -256,7 +258,11 @@ var Nebula = function (options) {
 	// Draw randomly growing nodes on each edge
 	nebula.drawNodes = function () {
 
+		//console.time('drawNodes');
+
 		requestAnimFrame(nebula.drawNodes);
+
+		circleGraphics.clear();
 
 		var total = nodes.length;
 
@@ -281,8 +287,6 @@ var Nebula = function (options) {
 		nextAlpha = Math.max(Math.min(parseFloat(c[3]) + Math.cos(Math.random() * 180 * parseFloat(c[3])) * 0.005, 1), 0);
 
 		for (var i = 0; i < total; i++) {
-			nodes[i].graphics.clear();
-
 			if (nodes[i].rad < nebula.settings.minRad) nodes[i].rad = nebula.settings.minRad;
 			if (nodes[i].rad > nebula.settings.maxRad) nodes[i].rad = nebula.settings.maxRad;
 
@@ -334,7 +338,7 @@ var Nebula = function (options) {
 			if (nodes[i].dy > nebula.settings.maxSpeed) nodes[i].dy *= nebula.settings.speedReduction;
 
 			// Redraw
-			element(nodes[i].graphics, nodes[i].x, nodes[i].y, nodes[i].rad, nodes[i].color, nodes[i].alpha);
+			element(circleGraphics, nodes[i].x, nodes[i].y, nodes[i].rad, nodes[i].color, nodes[i].alpha);
 		}
 
 		// Reset counters
@@ -342,8 +346,14 @@ var Nebula = function (options) {
 		if (explode.do) explode.do = false;
 		if (textChanged) textChanged = false;
 
+		//console.timeEnd('drawNodes');
+
+		//console.time('render');
+
 		// Draw
 		renderer.render(stage);
+
+		//console.timeEnd('render');
 
 	}
 
@@ -449,12 +459,10 @@ var Nebula = function (options) {
 			color: color,
 			destX: destX,
 			destY: destY,
-			rad: rad,
-			graphics: new PIXI.Graphics()
+			rad: rad
 		};
-		el.graphics.beginFill(webGLcolor(color), 0.7);
-		element(el.graphics, x, y, rad)
-		stage.addChild(el.graphics);
+		circleGraphics.beginFill(webGLcolor(color), 0.7);
+		element(circleGraphics, x, y, rad);
 
 		return el;
 	}
