@@ -357,8 +357,8 @@ var Nebula = function (options) {
 			nodes[i].dx += delta.x * gravity * nebula.settings.attraction * 0.0001 * nodes[i].rad * Math.random() - nebula.settings.drag * nodes[i].dx * nodes[i].rad;
 			nodes[i].dy += delta.y * gravity * nebula.settings.attraction * 0.0001 * nodes[i].rad * Math.random() - nebula.settings.drag * nodes[i].dy * nodes[i].rad;
 
-			if (nodes[i].dx > nebula.settings.maxSpeed) nodes[i].dx *= nebula.settings.speedReduction;
-			if (nodes[i].dy > nebula.settings.maxSpeed) nodes[i].dy *= nebula.settings.speedReduction;
+			if (Math.abs(nodes[i].dx) > nebula.settings.maxSpeed) nodes[i].dx *= nebula.settings.speedReduction;
+			if (Math.abs(nodes[i].dy) > nebula.settings.maxSpeed) nodes[i].dy *= nebula.settings.speedReduction;
 
 			// Redraw
 			element(circleGraphics, nodes[i].x, nodes[i].y, nodes[i].rad, nodes[i].color, nodes[i].alpha);

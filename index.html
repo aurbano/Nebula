@@ -24,6 +24,11 @@
 		h1{
 			font-weight: normal;
 		}
+
+		h1 small{
+			font-size:0.5em;
+			color:#ccc;
+		}
 		
 		a{
 			color:inherit;
@@ -60,66 +65,87 @@
 <body>
 
 	<div style="position:absolute; top:10px; left:10px;">
-		<h1>Nebula</h1>
+		<h1>Nebula <small>[WebGL version]</small></h1>
 		By <a href="/">Alejandro U. Alvarez</a><br />
-		<small>Fork <a href="https://github.com/aurbano/Nebula">Github repo</a></small>
+		<small>
+			Fork <a href="https://github.com/aurbano/Nebula">Github repo</a><br />
+			Powered by <a href="http://pixijs.com">Pixi.js</a>
+		</small>
 
-		<p><small>Try <a href="pixi.html">WebGL version</a></small></p>
+
+		<p><small>Try <a href="canvas.html">canvas only version</a></small></p>
 	</div>
 
 	<div id="config"><a href="#colorful">Change colors</a></div>
 
-	<canvas width="100%" height="100%" id="bg" style="color:#09F"></canvas>
+	<div width="100%" height="100%" id="bg" style="color:#09F"></div>
 
 	<div style="position:absolute; bottom:20px; left:50%; margin-left:-140px; color:#999; font-size:14px;">Click anywhere for explosions</div>
 
-	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="lib/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="lib/dat.gui/build/dat.gui.min.js"></script>
-	<script type="text/javascript" src="src/nebula.js"></script>
+	<script src="lib/pixi/bin/pixi.js"></script>
+	<script type="text/javascript" src="src/nebula-pixi.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function(){
-			var text = new Nebula();
+
+			var text = new Nebula({
+				container: $('#bg'),
+				showDistance: false,
+				showForce: false,
+				showEdges: false,
+				showNodes: true,
+				variableLineWidth: false,
+				resolution: 28,
+				drag: 0.0006,
+				drawFn: 'rectangle'
+			});
 			
 			// Uncomment block for dat.gui
 			var gui = new dat.GUI();
 
+			var f = gui.addFolder('Nebula');
 			var f1 = gui.addFolder('Particle physics');
 			var f2 = gui.addFolder('Explosions');
 			var f3 = gui.addFolder('Rendering');
+			var f4 = gui.addFolder('Text');
 
-			var textController = gui.add(text, 'text');
-			gui.add(text.settings, 'debug', [true, false]);
-			gui.add(text.settings, 'wait', 0, 60);
+			f.add(text.settings, 'debug', [true, false]);
 
-			f1.add(text.settings, 'tolerance',0,1);
 			f1.add(text.settings, 'minRad',0,100);
 			f1.add(text.settings, 'maxRad',0,100);
-			f1.add(text.settings, 'maxInitRad',0,1);
+			f1.add(text.settings, 'maxInitRad',0,50);
 			f1.add(text.settings, 'maxSpeed',0,10);
+			f1.add(text.settings, 'speedReduction',0,2);
 			f1.add(text.settings, 'variation',0,2);
-			f1.add(text.settings, 'attraction',-0.5,0.5);
+			f1.add(text.settings, 'attraction',-0.25,0.25);
+			f1.add(text.settings, 'drag',0,0.01);
 
 			f2.add(text.settings, 'explosionRadius',0,1000);
 			f2.add(text.settings, 'explosionForce',-0.5,0.5);
+			f2.add(text.settings, 'explosionBlur',0,10);
+			f2.add(text.settings, 'maxExplosionBlur',0,100);
 			
 			f3.add(text.settings, 'drawFn', ['circle', 'rectangle']);
 			f3.add(text.settings, 'showForce', [true, false]);
 			f3.add(text.settings, 'showDistance', [true, false]);
 			f3.add(text.settings, 'showEdges', [true, false]);
-			f3.add(text.settings, 'fadeAmount', 0, 1);
-			f3.addColor(text.settings, 'fadeColor');
+			//f3.add(text.settings, 'fadeAmount', 0, 1);
+			//f3.addColor(text.settings, 'fadeColor');
+
+			f4.add(text.settings, 'resolution',0,100);
+			f4.add(text.settings, 'tolerance',0,1);
+			var textController = f4.add(text, 'text');
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write(null, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
+			text.write(null, [0xff00ff, 0xffff00]);
 
 			textController.onFinishChange(function(value) {
-				text.write(value, ['rgba(255,0,255,0.7)', 'rgba(255,255,0,0.5)']);
+				text.write(value, [0xff00ff, 0xffff00]);
 			});
 			
-			$('canvas').mousemove(function(e){ text.mouseMove(e); });
-			$('canvas').resize(function(e){text.resizeCanvas(); });
-			$('canvas').click(function(e){text.explosion(e); });
+			$('#bg').click(function(e){ text.explosion(e); });
 			
 			$("a[href='#colorful']").click(function(e){
 				e.preventDefault();
