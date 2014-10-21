@@ -235,9 +235,9 @@ var Nebula = function (options) {
 
 	// Generate an explosion at the coordinates defined
 	// by event e
-	nebula.explosion = function (e) {
-		explode.x = e.pageX;
-		explode.y = e.pageY;
+	nebula.explosion = function (x, y) {
+		explode.x = x;
+		explode.y = y;
 		explode.done = true;
 
 		debug("Explode: ", explode);
@@ -404,8 +404,6 @@ var Nebula = function (options) {
 			} else {
 
 				explode.exploding = Math.min(explode.exploding, nebula.settings.maxExplosionBlur);
-
-				debug("Explosion blur: exploding=" + explode.exploding + ', amount=' + amount);
 
 				blurFilter.blur = amount;
 			}

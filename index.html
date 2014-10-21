@@ -145,7 +145,7 @@
 				text.write(value, [0xff00ff, 0xffff00]);
 			});
 			
-			$('#bg').click(function(e){ text.explosion(e); });
+			$('#bg').click(function(e){ text.explosion(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top); });
 			
 			$("a[href='#colorful']").click(function(e){
 				e.preventDefault();
