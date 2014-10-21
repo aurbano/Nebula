@@ -17,7 +17,7 @@ var Nebula = function (options) {
 		resolution: 20,
 		tolerance: 0, // 0 to 1
 		minRad: 3,
-		maxRad: 60,
+		maxRad: 40,
 		maxInitRad: 2,
 		maxSpeed: 5,
 		speedReduction: 0.8,
@@ -41,8 +41,8 @@ var Nebula = function (options) {
 		drag: 0.001,
 		explosionBlur: 1,
 		maxExplosionBlur: 20,
-		bgColor: 0xf5f5f5,
-		blendMode: 'NORMAL'
+		bgColor: 0x000000,
+		blendMode: 'ADD'
 	};
 
 	nebula.text = 'alex';
@@ -243,33 +243,6 @@ var Nebula = function (options) {
 		debug("Explode: ", explode);
 	}
 
-	// Sets a property
-	nebula.set = function (name, val) {
-		switch (name) {
-		case 'mode':
-			nebula.settings.mode = val;
-			nebula.settings.modeChanged = true;
-			break;
-		}
-	}
-
-	nebula.applyColors = function (colors, circles) {
-		if (nebula.settings.mode == 'colorful') {
-			for (var a = 0; a < colors.length; a++) {
-				var randColor = nebula.newColor();
-				for (var i = 0; i < total; i++) {
-					circles[a][i].color = randColor;
-				}
-			}
-		} else if (nebula.settings.mode == 'normal') {
-			for (var a = 0; a < colors.length; a++) {
-				for (var i = 0; i < total; i++) {
-					circles[a][i].color = colors[a];
-				}
-			}
-		}
-	}
-
 	// Approximate function for distance calc
 	nebula.distance = function (dx, dy) {
 		return 1.426776695 * Math.min(0.7071067812 * (Math.abs(dx) + Math.abs(dy)), Math.max(Math.abs(dx), Math.abs(dy)));
@@ -412,30 +385,7 @@ var Nebula = function (options) {
 		if (textChanged) textChanged = false;
 	}
 
-	/* Drawing functions */
-
-	drawingFn.circle = function (x, y, rad, color, canvasObj) {
-		// Circulo
-		canvasObj.ctx.fillStyle = color;
-		canvasObj.ctx.beginPath();
-		canvasObj.ctx.arc(x, y, rad, 0, Math.PI * 2, true);
-		canvasObj.ctx.closePath();
-		canvasObj.ctx.fill();
-	}
-
-	drawingFn.rectangle = function (x, y, rad, color, canvasObj) {
-		// Circulo
-		canvasObj.ctx.fillStyle = color;
-		canvasObj.ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
-	}
-
 	/* Internal functions */
-
-	function fade() {
-		var color = nebula.settings.fadeColor;
-		canvas.ctx.fillStyle = "rgba(" + color[0] + "," + color[1] + "," + color[2] + "," + nebula.settings.fadeAmount + ")";
-		canvas.ctx.fillRect(0, 0, canvas.WIDTH, canvas.HEIGHT);
-	}
 
 	function clear() {
 		// Clear canvas

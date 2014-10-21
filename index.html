@@ -97,7 +97,12 @@
 				showNodes: true,
 				variableLineWidth: false,
 				resolution: 22,
-				drag: 0.01,
+				drag: 0.0005,
+				minRad: 3,
+				maxRad: 12,
+				maxSpeed: 4,
+				speedReduction: 0.15,
+				attraction: 0.25,
 				drawFn: 'rectangle'
 			});
 			
@@ -139,10 +144,10 @@
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write('nebula', [0x7752FF, 0x4DA6F0]);
+			text.write('nebula', [0xff00ff, 0x63DBFF]);
 
 			textController.onFinishChange(function(value) {
-				text.write(value, [0xff00ff, 0xffff00]);
+				text.write(value, [0xff00ff, 0x63DBFF]);
 			});
 			
 			$('#bg').click(function(e){ text.explosion(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top); });
