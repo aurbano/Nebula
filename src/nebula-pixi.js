@@ -51,12 +51,15 @@ var Nebula = function (options) {
 	var canvas = {
 		el: document.createElement('canvas'),
 		ctx: null,
+		HEIGHT: nebula.settings.container.height(),
+		WIDTH: nebula.settings.container.width(),
 		canvasMinX: nebula.settings.container.offset().left,
 		canvasMaxX: nebula.settings.container.offset().left + nebula.settings.container.width(),
 		canvasMinY: nebula.settings.container.offset().top,
 		canvasMaxY: nebula.settings.container.offset().top + nebula.settings.container.height()
 	};
 
+	// Resize canvas to fit container
 	canvas.el.width = nebula.settings.container.width();
 	canvas.el.height = nebula.settings.container.height();
 	canvas.ctx = canvas.el.getContext('2d');
@@ -154,11 +157,8 @@ var Nebula = function (options) {
 	nebula.resizeCanvas = function () {
 		content.recalculate = true;
 
-		canvas.WIDTH = window.innerWidth;
-		canvas.HEIGHT = window.innerHeight;
-
-		nebula.settings.container.attr('width', canvas.WIDTH);
-		nebula.settings.container.attr('height', canvas.HEIGHT);
+		canvas.el.width = canvas.WIDTH = nebula.settings.container.width();
+		canvas.el.height = canvas.HEIGHT = nebula.settings.container.height();
 	}
 
 	nebula.newColor = function () {
