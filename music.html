@@ -7,7 +7,7 @@
 	<link rel="apple-touch-icon" sizes="72x72" href="http://urbanoalvarez.es/assets/files/touch-icon-72.png">
 	<link rel="apple-touch-icon" sizes="114x114" href="http://urbanoalvarez.es/assets/files/touch-icon-114.png">
 
-	<title>Nebula - Alejandro U. Alvarez</title>
+	<title>Music Nebula - Alejandro U. Alvarez</title>
 
 	<style type="text/css">
 		html,body{
@@ -57,12 +57,14 @@
 		</small>
 
 
-		<p><small>Try <a href="music.html">music version</a></small></p>
+		<p><small>Try <a href="index.html">normal version</a></small></p>
 	</div>
 
 	<div id="bg" style="color:#09F"></div>
 
-	<div style="position:absolute; bottom:20px; left:50%; margin-left:-140px; color:#999; font-size:14px;">Click anywhere for explosions</div>
+	<div style="position:absolute; bottom:20px; left:50%; margin-left:-140px; color:#999; font-size:14px;">Turn up the volume!</div>
+
+	<audio id="explosions" src="misc/dubstep.mp3" preload="metadata"></audio>
 
 	<script src="lib/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="lib/dat.gui/build/dat.gui.min.js"></script>
@@ -79,14 +81,22 @@
 				showNodes: true,
 				variableLineWidth: false,
 				resolution: 22,
-				drag: 0.0005,
+				drag: 0.01,
 				minRad: 3,
 				maxRad: 12,
 				maxSpeed: 4,
 				speedReduction: 0.15,
-				attraction: 0.25,
-				drawFn: 'rectangle'
+				attraction: 1,
+				drawFn: 'rectangle',
+				explosionForce: 0.02,
+				explosionRadius: 165,
+				explosionBlur: 0.3,
+				maxExplosionBlur: 7
 			});
+
+			var musicSettings = {
+				freqThreshold : 254
+			};
 			
 			// Uncomment block for dat.gui
 			var gui = new dat.GUI();
@@ -96,6 +106,7 @@
 			var f2 = gui.addFolder('Explosions');
 			var f3 = gui.addFolder('Rendering');
 			var f4 = gui.addFolder('Text');
+			var f5 = gui.addFolder('Music');
 
 			f.add(text.settings, 'debug', [true, false]);
 
@@ -105,7 +116,7 @@
 			f1.add(text.settings, 'maxSpeed',0,10);
 			f1.add(text.settings, 'speedReduction',0,2);
 			f1.add(text.settings, 'variation',0,2);
-			f1.add(text.settings, 'attraction',-0.25,0.25);
+			f1.add(text.settings, 'attraction',-0.25,1);
 			f1.add(text.settings, 'drag',0,0.01);
 
 			f2.add(text.settings, 'explosionRadius',0,1000);
@@ -123,21 +134,62 @@
 			f4.add(text.settings, 'resolution',0,100);
 			f4.add(text.settings, 'tolerance',0,1);
 			var textController = f4.add(text, 'text');
+
+			f5.add(musicSettings, 'freqThreshold',0,1000);
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write('nebula', [0xff00ff, 0x63DBFF]);
+			text.write('music', [0xff00ff, 0x63DBFF]);
 
 			textController.onFinishChange(function(value) {
 				text.write(value, [0xff00ff, 0x63DBFF]);
 			});
 			
-			$('#bg').click(function(e){ text.explosion(e.pageX - $(this).offset().left, e.pageY - $(this).offset().top); });
+			window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
+
+			var audio = document.getElementById('explosions'),
+				audioCtx = new AudioContext(),
+				analyser = audioCtx.createAnalyser(),
+				source =  audioCtx.createMediaElementSource(audio);
+
+			source.connect(analyser);
+
+			analyser.connect(audioCtx.destination);
+			analyser.smoothingTimeConstant = 0.3;
+			analyser.fftSize = 512;
+
+			var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+
+			audio.play();
+
+			function animation() {
+				requestAnimationFrame(animation);
+				
+				analyser.getByteFrequencyData(frequencyData);
+				
+				frequencyExplode(frequencyData);
+			}
+
+			animation();
+
+			function frequencyExplode(freqData){
+				var total = freqData.length;
+
+				// Divide by 2 because half the data is always 0
+				// I then try to bring it all to a sameish level, to have only
+				// really loud parts explode
+				for(var i=0; i<total/2; i++){
+					if(freqData[i] > musicSettings.freqThreshold){
+						
+						debugger;
+
+						var x = $(document).width() * i / (total/2) + $(document).width() * Math.random();
+
+						text.explosion(x, $(document).height()*Math.random());
+					}
+				}
+			}
 			
-			$("a[href='#colorful']").click(function(e){
-				e.preventDefault();
-				text.set('mode','colorful');
-			});
 		});
 	</script>
 
