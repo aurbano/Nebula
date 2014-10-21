@@ -113,7 +113,6 @@ var Nebula = function (options) {
 			} while (textSize.width < canvas.WIDTH && content.size < canvas.HEIGHT);
 			// Size done, recalculating resolution
 			//nebula.settings.resolution = Math.ceil(content.size / nebula.settings.resolutionScale);
-			nebula.settings.maxRad = Math.ceil(nebula.settings.radLimitScale / content.size);
 			debug('Using resolution: ' + nebula.settings.resolution);
 		}
 
@@ -311,8 +310,7 @@ var Nebula = function (options) {
 
 			nodes[i].rad += Math.sin(Math.random() * 180 + i) * nebula.settings.variation;
 
-			if (nodes[i].rad < nebula.settings.minRad) nodes[i].rad = nebula.settings.minRad;
-			if (nodes[i].rad > nebula.settings.maxRad) nodes[i].rad = nebula.settings.maxRad;
+			nodes[i].rad = Math.max(Math.min(nodes[i].rad, nebula.settings.maxRad), nebula.settings.minRad);
 
 			// Update speed if explosion happened nearby
 			if (explode.done) {
