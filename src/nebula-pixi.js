@@ -40,7 +40,9 @@ var Nebula = function (options) {
 		variableLineWidth: false,
 		drag: 0.001,
 		explosionBlur: 1,
-		maxExplosionBlur: 20
+		maxExplosionBlur: 20,
+		bgColor: 0x000000,
+		blendMode: 'ADD'
 	};
 
 	nebula.text = 'alex';
@@ -82,7 +84,7 @@ var Nebula = function (options) {
 
 	// Setup pixi
 	// create an new instance of a pixi stage
-	var stage = new PIXI.Stage(0x000000),
+	var stage = new PIXI.Stage(nebula.settings.bgColor),
 		renderer = PIXI.autoDetectRenderer(canvas.el.width, canvas.el.height, null, false, true),
 		circleGraphics = new PIXI.Graphics(),
 		extras = new PIXI.Graphics(),
@@ -93,7 +95,7 @@ var Nebula = function (options) {
 	stage.addChild(extras);
 	stage.addChild(circleGraphics);
 
-	circleGraphics.blendMode = PIXI.blendModes.ADD;
+	circleGraphics.blendMode = PIXI.blendModes[nebula.settings.blendMode];
 
 	// add the renderer view element to the DOM
 	nebula.settings.container.append(renderer.view);
