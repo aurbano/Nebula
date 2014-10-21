@@ -96,7 +96,7 @@
 				showEdges: false,
 				showNodes: true,
 				variableLineWidth: false,
-				resolution: 28,
+				resolution: 30,
 				drag: 0.001,
 				drawFn: 'circle'
 			});
@@ -132,7 +132,7 @@
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write(null, [0xff00ff]);
+			text.write(null, [0xff00ff, 0xffff00]);
 
 			textController.onFinishChange(function(value) {
 				text.write(value, [0xff00ff, 0xffff00]);
