@@ -96,8 +96,8 @@
 				showEdges: false,
 				showNodes: true,
 				variableLineWidth: false,
-				resolution: 28,
-				drag: 0.0006,
+				resolution: 22,
+				drag: 0.01,
 				drawFn: 'rectangle'
 			});
 			
@@ -139,7 +139,7 @@
 			
 			// Write text and choose effect
 			//var name = prompt("What's your name?");
-			text.write(null, [0xff00ff, 0xffff00]);
+			text.write('nebula', [0x7752FF, 0x4DA6F0]);
 
 			textController.onFinishChange(function(value) {
 				text.write(value, [0xff00ff, 0xffff00]);

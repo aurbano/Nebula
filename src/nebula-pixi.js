@@ -41,8 +41,8 @@ var Nebula = function (options) {
 		drag: 0.001,
 		explosionBlur: 1,
 		maxExplosionBlur: 20,
-		bgColor: 0x000000,
-		blendMode: 'ADD'
+		bgColor: 0xf5f5f5,
+		blendMode: 'NORMAL'
 	};
 
 	nebula.text = 'alex';
@@ -330,9 +330,6 @@ var Nebula = function (options) {
 					// Update speed
 					nodes[i].dx = force.x;
 					nodes[i].dy = force.y;
-
-					nodes[i].color = '#ffffff';
-					nodes[i].alpha = 1;
 
 					explode.exploding += 0.5;
 
