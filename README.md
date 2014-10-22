@@ -7,7 +7,7 @@ Download the source code and include the files in the `src` folder (css and js).
 
 It requires jQuery to work, so make sure it's included before the `nebula.js` script.
 
-##Demo
+##→ Demo
 I've build some visualizations using Nebula, if you have created something cool let me know via an issue and I'll add it here
 
 * [Main demo](http://urbanoalvarez.es/Nebula/): Sample demo with dat.gui controls to play with the settings.
