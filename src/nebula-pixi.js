@@ -13,7 +13,7 @@ var Nebula = function (options) {
 		drawingFn = {};
 
 	nebula.settings = {
-		container: $('canvas'),
+		container: $('#nebula'),
 		resolution: 20,
 		tolerance: 0, // 0 to 1
 		minRad: 3,
