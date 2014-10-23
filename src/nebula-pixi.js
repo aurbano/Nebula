@@ -239,8 +239,6 @@ var Nebula = function (options) {
 		explode.x = x;
 		explode.y = y;
 		explode.done = true;
-
-		debug("Explode: ", explode);
 	}
 
 	// Approximate function for distance calc
