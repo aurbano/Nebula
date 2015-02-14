@@ -2,16 +2,20 @@
 
 > An HTML5+JavaScript Nebula text effect, it displays text by making rectangles/circles float inside it.
 
+![Nebula](https://raw.githubusercontent.com/aurbano/Nebula/master/misc/screenshot.png)
+
 ##Installation
 Download the source code and include the files in the `src` folder (css and js). You can obviously customize the css to your needs.
+
+Read more about it here: http://urbanoalvarez.es/blog/making-of-nebula-text/
 
 It requires jQuery to work, so make sure it's included before the `nebula.js` script.
 
 ##→ Demo
-I've build some visualizations using Nebula, if you have created something cool let me know via an issue and I'll add it here
+I've built some visualizations using Nebula, if you have created something cool let me know via an issue and I'll add it here
 
 * [Main demo](http://urbanoalvarez.es/Nebula/): Sample demo with dat.gui controls to play with the settings.
-* [Music Nebula](http://urbanoalvarez.es/Nebula/music.html): Nebula instance synced with an audio track for explosions.
+* [Music Nebula](http://urbanoalvarez.es/Nebula/music.html): Nebula instance synced (automatically) with an audio track for explosions.
 * [Embedded](http://urbanoalvarez.es/blog/making-of-nebula-text/): Example where I have embedded Nebula inside a div on a page.
 
 ##Usage
@@ -111,6 +115,9 @@ $('#bg').click(function(e){
 
 ##Resizing
 If you want the Nebula element to fit the container after resizing, call `text.resizeCanvas();`
+
+##Contributing
+Feel free to add any issues or send pull requests for bug fixes or new features, they are always welcome!
 
 ##License
 Nebula is released under the GNU GPLv2 License.
