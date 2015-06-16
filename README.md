@@ -125,3 +125,5 @@ Nebula is released under the GNU GPLv2 License.
 -------
 
 Developed by [Alejandro U. Alvarez](http://urbanoalvarez.es)
+
+[![Analytics](https://ga-beacon.appspot.com/UA-3181088-16/nebula/readme)](https://github.com/aurbano)
