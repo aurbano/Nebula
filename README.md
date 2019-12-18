@@ -1,24 +1,24 @@
-#Nebula
+# Nebula
 
 > An HTML5+JavaScript Nebula text effect, it displays text by making rectangles/circles float inside it.
 
 ![Nebula](https://raw.githubusercontent.com/aurbano/Nebula/master/misc/screenshot.png)
 
-##Installation
+## Installation
 Download the source code and include the files in the `src` folder (css and js). You can obviously customize the css to your needs.
 
-Read more about it here: http://urbanoalvarez.es/blog/making-of-nebula-text/
+Read more about it here: https://aurbano.eu/note/2014-10-21-making-of-nebula-text/
 
 It requires jQuery to work, so make sure it's included before the `nebula.js` script.
 
-##→ Demo
+## Demo
 I've built some visualizations using Nebula, if you have created something cool let me know via an issue and I'll add it here
 
-* [Main demo](http://urbanoalvarez.es/Nebula/): Sample demo with dat.gui controls to play with the settings.
-* [Music Nebula](http://urbanoalvarez.es/Nebula/music.html): Nebula instance synced (automatically) with an audio track for explosions.
-* [Embedded](http://urbanoalvarez.es/blog/making-of-nebula-text/): Example where I have embedded Nebula inside a div on a page.
+* [Main demo](https://aurbano.github.io/Nebula/): Sample demo with dat.gui controls to play with the settings.
+* [Music Nebula](https://aurbano.github.io/Nebula/music.html): Nebula instance synced (automatically) with an audio track for explosions.
+* [Embedded](https://aurbano.eu/note/2014-10-21-making-of-nebula-text/): Example where I have embedded Nebula inside a div on a page.
 
-##Usage
+## Usage
 Add an HTML container where you would like the text to appear:
 
 ```html
@@ -60,7 +60,7 @@ The function that starts the drawing is `write(text, colors)`. It accepts 2 para
 
 Nebula uses [Pixi.js](https://github.com/GoodBoyDigital/pixi.js) as the rendering engine, it will default to WebGL if possible and fallback to HTML5 canvas.
 
-##Options
+## Options
 The following options can be passed to the constructor for configuration, use the dat.gui controls on the demo to experiment with them.
 
 *Some parameters are only used when setting a new text (resolution, tolerance... ) so you might have to write a new text and hit Enter on the demo.*
@@ -95,10 +95,10 @@ The following options can be passed to the constructor for configuration, use th
 
 To understand what each parameter does open the `index.html` file and play with the dat.gui controls.
 
-##Explosions
+## Explosions
 Nebula includes an explosion system that you can call using `text.explosion(x, y);`.
 
-###Example
+### Example
 
 ```javascript
 var text = new Nebula({
@@ -113,17 +113,17 @@ $('#bg').click(function(e){
 });
 ```
 
-##Resizing
+## Resizing
 If you want the Nebula element to fit the container after resizing, call `text.resizeCanvas();`
 
-##Contributing
+## Contributing
 Feel free to add any issues or send pull requests for bug fixes or new features, they are always welcome!
 
-##License
+## License
 Nebula is released under the GNU GPLv2 License.
 
 -------
 
-Developed by [Alejandro U. Alvarez](http://urbanoalvarez.es)
+Developed by [Alejandro U. Alvarez](https://aurbano.eu)
 
 [![Analytics](https://ga-beacon.appspot.com/UA-3181088-16/nebula/readme)](https://github.com/aurbano)
